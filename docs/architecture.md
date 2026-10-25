@@ -229,8 +229,9 @@ when CPU or request latency crosses its target.
    trimming, 1–100 characters; `body` is optional and at most 10,000 characters.
    Invalid input returns **400** with a validation error envelope, and the client
    shows the message without clearing the form.
-4. The app verifies that any supplied tag ids or names belong to `user_id`; a tag that
-   belongs to another user returns **403/422**.
+4. The app validates the tag names and resolves them with the authenticated `user_id`.
+   Tags are always created or looked up inside that user's scope, so another user's tag
+   can never be attached.
 5. The app opens a transaction on the **primary** database and inserts the note
    (`INSERT ... RETURNING id, created_at`), then inserts or reuses the tag rows and
    inserts the `note_tags` links. It commits only after every row succeeds.
