@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickNotes</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <h1>QuickNotes</h1>
+    <p class="tagline">Capture a thought before it gets away.</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-labelledby="notes-heading">
+      <div class="toolbar">
+        <h2 id="notes-heading">Notes</h2>
+        <button id="load-btn" type="button">Load notes</button>
+      </div>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <ul id="notes-list" class="notes-list"></ul>
+    </section>
+  </main>
+</body>
+</html>
