@@ -14,6 +14,32 @@
   </header>
 
   <main class="layout">
+    <section class="panel" aria-labelledby="create-heading">
+      <h2 id="create-heading">New note</h2>
+
+      <form id="note-form" novalidate>
+        <div class="field">
+          <label for="title-input">Title</label>
+          <input
+            id="title-input"
+            name="title"
+            type="text"
+            maxlength="100"
+            required
+            aria-describedby="title-hint"
+          >
+          <p id="title-hint" class="hint">Required. Maximum 100 characters.</p>
+        </div>
+
+        <div class="field">
+          <label for="body-input">Body <span class="optional">(optional)</span></label>
+          <textarea id="body-input" name="body" rows="4"></textarea>
+        </div>
+
+        <button id="submit-btn" type="submit">Save note</button>
+      </form>
+    </section>
+
     <section class="panel" aria-labelledby="notes-heading">
       <div class="toolbar">
         <h2 id="notes-heading">Notes</h2>
