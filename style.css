@@ -216,6 +216,32 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.note-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--line);
+}
+
+.note-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+button.danger {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+button.danger:hover:not(:disabled) {
+  background: #fecaca;
+}
+
 .empty {
   padding: 2rem 1rem;
   text-align: center;

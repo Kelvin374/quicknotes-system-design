@@ -2,6 +2,13 @@
 // This file proves that the QuickNotes front end can talk to a real HTTP API.
 // It uses the JSONPlaceholder practice API; the production API the backend
 // team should build is described in docs/api-design.md.
+//
+// JSONPlaceholder is a fake API: POST /posts returns a simulated note with a
+// new id but does not persist it, and DELETE only pretends to delete. Notes
+// created in this browser session are kept in the list and their ids are
+// tracked in `sessionNoteIds`. A DELETE is still sent for every note; if the
+// server answers 404 for a note that only ever existed in this tab, we remove
+// it locally and say so, because there is nothing on the server to delete.
 
 const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
@@ -14,6 +21,7 @@ const bodyInput = document.getElementById('body-input');
 const submitBtn = document.getElementById('submit-btn');
 
 let notes = [];
+const sessionNoteIds = new Set();
 let requestsInFlight = 0;
 
 /**
@@ -74,7 +82,21 @@ function createNoteElement(note) {
   body.className = 'note-body';
   body.textContent = note.body || 'No body.';
 
-  item.append(title, body);
+  const actions = document.createElement('div');
+  actions.className = 'note-actions';
+
+  const meta = document.createElement('span');
+  meta.className = 'note-meta';
+  meta.textContent = `Note #${note.id}`;
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'danger';
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.addEventListener('click', () => deleteNote(note.id, deleteBtn));
+
+  actions.append(meta, deleteBtn);
+  item.append(title, body, actions);
   return item;
 }
 
@@ -144,6 +166,7 @@ async function createNote() {
     };
 
     notes.unshift(saved);
+    sessionNoteIds.add(String(saved.id));
     renderNotes(notes);
     noteForm.reset();
     setStatus(`Note created (status ${status}, id ${saved.id}).`, 'success');
@@ -154,6 +177,39 @@ async function createNote() {
   }
 }
 
+/** DELETE a note (Task 3). */
+async function deleteNote(id, button) {
+  trackRequest(1);
+  button.disabled = true;
+  setStatus('Deleting note...', 'loading');
+
+  try {
+    const { status } = await request(`${API_URL}/${id}`, { method: 'DELETE' });
+    removeNote(id);
+    setStatus(`Note deleted (status ${status}).`, 'success');
+  } catch (error) {
+    if (error.status === 404 && sessionNoteIds.has(String(id))) {
+      // The note was only ever rendered in this tab, so a 404 is expected.
+      removeNote(id);
+      setStatus(
+        'Removed the note from this page. JSONPlaceholder never stored it (status 404), so there is nothing left on the server.',
+        'success'
+      );
+    } else {
+      setStatus(`Sorry, the note could not be deleted. ${error.message}`, 'error');
+    }
+  } finally {
+    trackRequest(-1);
+  }
+}
+
+/** Remove a note from local state and re-render the list. */
+function removeNote(id) {
+  notes = notes.filter((note) => String(note.id) !== String(id));
+  sessionNoteIds.delete(String(id));
+  renderNotes(notes);
+}
+
 /** GET the ten most recent notes (Task 1). */
 async function loadNotes() {
   trackRequest(1);
@@ -162,6 +218,7 @@ async function loadNotes() {
   try {
     const { data } = await request(`${API_URL}?_limit=10`);
     notes = Array.isArray(data) ? data : [];
+    sessionNoteIds.clear();
     renderNotes(notes);
 
     if (notes.length === 0) {
